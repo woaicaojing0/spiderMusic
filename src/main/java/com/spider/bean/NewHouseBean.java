@@ -1,14 +1,16 @@
-package com.spider.cj;
+package com.spider.bean;
+
+import java.math.BigDecimal;
 
 /**
  * @author cj34920
  * Date: 2018/05/30
  */
-public class HouseBean {
+public class NewHouseBean {
     /**
      * 房子 id
      */
-    private String houseId;
+    private int houseId;
     /**
      * 房子名称
      */
@@ -28,16 +30,40 @@ public class HouseBean {
     /**
      * 参考价格
      */
-    private String referencePrice;
+    private BigDecimal referencePrice;
+    /**
+     * 价格单位
+     */
+    private String referencePriceUnit;
+    /**
+     * 房子类型商住还是住宅
+     */
+    private String referencePriceType;
     /**
      * 周边价格
      */
-    private String circumPrice;
+    private BigDecimal circumPrice;
     /**
      * 联系电话
      */
     private String contactNumber;
     private String imgUrl;
+    /**
+     * 地址纬度
+     */
+    private String baiduLat;
+    /**
+     * 地址经度
+     */
+    private String baiduLng;
+
+    public int getHouseId() {
+        return houseId;
+    }
+
+    public void setHouseId(int houseId) {
+        this.houseId = houseId;
+    }
 
     public String getHouseName() {
         return houseName;
@@ -71,27 +97,19 @@ public class HouseBean {
         this.houseType = houseType;
     }
 
-    public String getHouseId() {
-        return houseId;
-    }
-
-    public void setHouseId(String houseId) {
-        this.houseId = houseId;
-    }
-
-    public String getReferencePrice() {
+    public BigDecimal getReferencePrice() {
         return referencePrice;
     }
 
-    public void setReferencePrice(String referencePrice) {
+    public void setReferencePrice(BigDecimal referencePrice) {
         this.referencePrice = referencePrice;
     }
 
-    public String getCircumPrice() {
+    public BigDecimal getCircumPrice() {
         return circumPrice;
     }
 
-    public void setCircumPrice(String circumPrice) {
+    public void setCircumPrice(BigDecimal circumPrice) {
         this.circumPrice = circumPrice;
     }
 
@@ -109,5 +127,37 @@ public class HouseBean {
 
     public void setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
+    }
+
+    public String getBaiduLat() {
+        return baiduLat;
+    }
+
+    public void setBaiduLat(String baiduLat) {
+        this.baiduLat = baiduLat;
+    }
+
+    public String getBaiduLng() {
+        return baiduLng;
+    }
+
+    public void setBaiduLng(String baiduLng) {
+        this.baiduLng = baiduLng;
+    }
+
+    public String getReferencePriceUnit() {
+        return referencePriceUnit;
+    }
+
+    public void setReferencePriceUnit(String referencePriceUnit) {
+        this.referencePriceUnit = referencePriceUnit;
+    }
+
+    public String getReferencePriceType() {
+        return referencePriceType;
+    }
+
+    public void setReferencePriceType(String referencePriceType) {
+        this.referencePriceType = referencePriceType;
     }
 }

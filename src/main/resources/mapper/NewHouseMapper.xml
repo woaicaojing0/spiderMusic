@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.spider.dao.NewHouseDao">
+
+    <insert id="insertInfo">
+        INSERT INTO new_house_info (houseId, houseName, houseAddress,
+                                    houseBig, houseType, referencePrice, referencePriceUnit, referencePriceType,
+                                    circumPrice, contactNumber, imgUrl, baiduLat, baiduLng)
+        VALUES
+            (#{newHouseBean.houseId}, #{newHouseBean.houseName}, #{newHouseBean.houseAddress},
+                                      #{newHouseBean.houseBig}, #{newHouseBean.houseType},
+                                      #{newHouseBean.referencePrice}, #{newHouseBean.referencePriceUnit},
+                                      #{newHouseBean.referencePriceType},
+                                      #{newHouseBean.circumPrice}, #{newHouseBean.contactNumber},
+                                      #{newHouseBean.imgUrl},
+             #{newHouseBean.baiduLat}, #{newHouseBean.baiduLng})
+    </insert>
+
+</mapper>
