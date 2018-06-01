@@ -19,8 +19,8 @@ import java.util.Map;
  * Date: 2018/05/30
  */
 @Component
-public class CustomPipeline implements Pipeline {
-    private Logger logger = LoggerFactory.getLogger(CustomPipeline.class);
+public class MysqlNewHosePipeline implements Pipeline {
+    private Logger logger = LoggerFactory.getLogger(MysqlNewHosePipeline.class);
     private List<NewHouseBean> houseBeans = new ArrayList<>();
     private static int i = 0;
     @Autowired

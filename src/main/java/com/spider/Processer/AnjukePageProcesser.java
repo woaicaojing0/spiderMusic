@@ -1,6 +1,6 @@
 package com.spider.Processer;
 
-import com.spider.Pipeline.CustomPipeline;
+import com.spider.Pipeline.MysqlNewHosePipeline;
 import com.spider.bean.NewHouseBean;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  * @author cj34920
  * Date: 2018/05/30
  */
-public class JDPageProcesser implements PageProcessor {
+public class AnjukePageProcesser implements PageProcessor {
 
     /**
      * 部分一：抓取网站的相关配置，包括编码、抓取间隔、重试次数等
@@ -114,9 +114,9 @@ public class JDPageProcesser implements PageProcessor {
 
     public static void main(String[] args) {
 
-        Spider.create(new JDPageProcesser())
+        Spider.create(new AnjukePageProcesser())
                 //从"https://github.com/code4craft"开始抓
-                .addUrl("https://su.fang.anjuke.com/loupan/all/p1/").addPipeline(new CustomPipeline())
+                .addUrl("https://su.fang.anjuke.com/loupan/all/p1/").addPipeline(new MysqlNewHosePipeline())
                 //开启5个线程抓取
                 .thread(5).setScheduler(new QueueScheduler().setDuplicateRemover(new HashSetDuplicateRemover()))
                 //启动爬虫

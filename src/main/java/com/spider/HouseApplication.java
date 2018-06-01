@@ -1,7 +1,7 @@
 package com.spider;
 
-import com.spider.Pipeline.CustomPipeline;
-import com.spider.Processer.JDPageProcesser;
+import com.spider.Pipeline.MysqlNewHosePipeline;
+import com.spider.Processer.AnjukePageProcesser;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -17,7 +17,7 @@ import us.codecraft.webmagic.scheduler.component.HashSetDuplicateRemover;
 
 public class HouseApplication implements ApplicationRunner{
 	@Autowired
-	private  CustomPipeline customPipeline;
+	private MysqlNewHosePipeline customPipeline;
 	public static void main(String[] args) {
 		SpringApplication.run(HouseApplication.class, args);
 
@@ -25,7 +25,7 @@ public class HouseApplication implements ApplicationRunner{
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		Spider spider = new Spider(new JDPageProcesser());
+		Spider spider = new Spider(new AnjukePageProcesser());
 		spider.addUrl("https://su.fang.anjuke.com/loupan/all/p1/").addPipeline(customPipeline)
 				.thread(5).setScheduler(new QueueScheduler().setDuplicateRemover(new HashSetDuplicateRemover()));
 		//启动爬虫

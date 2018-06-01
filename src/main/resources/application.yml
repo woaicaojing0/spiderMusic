@@ -1,6 +1,6 @@
 #mybatis.config-location=classpath:mybatis-config.xml
-#mybatis mapperÎÄ¼şµÄÎ»ÖÃ
-#É¨ÃèpojoÀàµÄÎ»ÖÃ,ÔÚ´Ë´¦Ö¸Ã÷É¨ÃèÊµÌåÀàµÄ°ü£¬ÔÚmapperÖĞ¾Í¿ÉÒÔ²»ÓÃĞ´pojoÀàµÄÈ«Â·¾¶ÃûÁË
+#mybatis mapperæ–‡ä»¶çš„ä½ç½®
+#æ‰«æpojoç±»çš„ä½ç½®,åœ¨æ­¤å¤„æŒ‡æ˜æ‰«æå®ä½“ç±»çš„åŒ…ï¼Œåœ¨mapperä¸­å°±å¯ä»¥ä¸ç”¨å†™pojoç±»çš„å…¨è·¯å¾„åäº†
 
 mybatis:
   type-aliases-package: com.spider.bean
