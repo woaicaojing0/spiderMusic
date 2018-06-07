@@ -1,15 +1,22 @@
 #mybatis.config-location=classpath:mybatis-config.xml
 #mybatis mapper文件的位置
 #扫描pojo类的位置,在此处指明扫描实体类的包，在mapper中就可以不用写pojo类的全路径名了
-
 mybatis:
   type-aliases-package: com.spider.bean
   mapper-locations: classpath:mapper/*.xml
 spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/spiderhouse?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true
-    username: root
-    password: root123
+    username: ***
+    password: ***
     driver-class-name: com.mysql.jdbc.Driver
-
+  redis:
+    password: ***
+    host: ****
+    port: 6379
+lbs:
+  webApi: http://restapi.amap.com/v3/assistant/coordinate/convert
+  webKey: 615d7a323ea18d8df620ca9e89960c54
+server:
+  port: 8082
 

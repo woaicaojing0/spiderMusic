@@ -1,6 +1,6 @@
-package com.spider.Processer;
+package com.spider.processer;
 
-import com.spider.Pipeline.MysqlNewHosePipeline;
+import com.spider.pipeline.MysqlNewHosePipeline;
 import com.spider.bean.NewHouseBean;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -10,7 +10,9 @@ import us.codecraft.webmagic.scheduler.QueueScheduler;
 import us.codecraft.webmagic.scheduler.component.HashSetDuplicateRemover;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +34,7 @@ public class AnjukePageProcesser implements PageProcessor {
     public static final String regexLatAndLng = "lat: (.*), lng: (.*)}\\);";
     Pattern pHouseId = Pattern.compile(regexHouseId);
     Pattern pLatAndLng = Pattern.compile(regexLatAndLng);
+    DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM); //省略了Locale对象，默认中文环境
 
     @Override
     public void process(Page page) {
@@ -78,15 +81,15 @@ public class AnjukePageProcesser implements PageProcessor {
             houseBean.setHouseName(houseName == null ? "暂无" : houseName);
             houseBean.setHouseAddress(houseAddress);
             houseBean.setHouseType(houseType);
-            if(referencePrice ==null){
+            if (referencePrice == null) {
                 referencePrice = new BigDecimal(0);
-            }else {
+            } else {
                 referencePrice = new BigDecimal((String) referencePrice);
             }
 
-            if(circumPrice ==null){
+            if (circumPrice == null) {
                 circumPrice = new BigDecimal(0);
-            }else {
+            } else {
                 circumPrice = new BigDecimal((String) circumPrice);
             }
             houseBean.setReferencePrice((BigDecimal) referencePrice);
@@ -94,6 +97,7 @@ public class AnjukePageProcesser implements PageProcessor {
             houseBean.setContactNumber(contactNumber);
             houseBean.setImgUrl(houseImageUrl == null ? "" : houseImageUrl);
             houseBean.setHouseId(Integer.valueOf(houseId));
+            houseBean.setCreateTime(df.format(new Date()));
             allHouseBean.add(houseBean);
             page.putField("info", houseBean);
         } else {

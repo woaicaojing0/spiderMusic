@@ -1,4 +1,4 @@
-package com.spider.Pipeline;
+package com.spider.pipeline;
 
 import us.codecraft.webmagic.ResultItems;
 import us.codecraft.webmagic.Task;

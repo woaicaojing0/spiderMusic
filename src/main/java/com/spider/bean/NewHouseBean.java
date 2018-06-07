@@ -57,6 +57,8 @@ public class NewHouseBean {
      */
     private String baiduLng;
 
+    private String createTime;
+
     public int getHouseId() {
         return houseId;
     }
@@ -159,5 +161,13 @@ public class NewHouseBean {
 
     public void setReferencePriceType(String referencePriceType) {
         this.referencePriceType = referencePriceType;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 }

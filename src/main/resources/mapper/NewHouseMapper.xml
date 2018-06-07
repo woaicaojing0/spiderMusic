@@ -5,7 +5,7 @@
     <insert id="insertInfo">
         INSERT INTO new_house_info (houseId, houseName, houseAddress,
                                     houseBig, houseType, referencePrice, referencePriceUnit, referencePriceType,
-                                    circumPrice, contactNumber, imgUrl, baiduLat, baiduLng)
+                                    circumPrice, contactNumber, imgUrl, baiduLat, baiduLng,createTime)
         VALUES
             (#{newHouseBean.houseId}, #{newHouseBean.houseName}, #{newHouseBean.houseAddress},
                                       #{newHouseBean.houseBig}, #{newHouseBean.houseType},
@@ -13,7 +13,7 @@
                                       #{newHouseBean.referencePriceType},
                                       #{newHouseBean.circumPrice}, #{newHouseBean.contactNumber},
                                       #{newHouseBean.imgUrl},
-             #{newHouseBean.baiduLat}, #{newHouseBean.baiduLng})
+             #{newHouseBean.baiduLat}, #{newHouseBean.baiduLng},#{newHouseBean.createTime})
     </insert>
 
 </mapper>

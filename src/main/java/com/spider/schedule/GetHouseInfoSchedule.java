@@ -1,7 +1,7 @@
-package com.spider.Schedule;
+package com.spider.schedule;
 
-import com.spider.Pipeline.MysqlNewHosePipeline;
-import com.spider.Processer.AnjukePageProcesser;
+import com.spider.pipeline.MysqlNewHosePipeline;
+import com.spider.processer.AnjukePageProcesser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,10 @@ public class GetHouseInfoSchedule {
     @Autowired
     private MysqlNewHosePipeline customPipeline;
 
-    @Scheduled(cron = "*/5 * * * * *")
+    /**
+     * 每天1点钟获取新房信息
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
     public void doJob() {
         logger.info("定时获取新房信息-----------------------------------------");
         Spider spider = new Spider(new AnjukePageProcesser());
@@ -31,4 +34,12 @@ public class GetHouseInfoSchedule {
         spider.start();
         spider.stop();
     }
+
+//    /**
+//     * 每个月最后一天的23点开始统计这个月数据
+//     */
+//    @Scheduled(cron = "0 0 23 L * ?")
+//    public void doMonthJob() {
+//
+//    }
 }
