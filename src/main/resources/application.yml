@@ -16,7 +16,7 @@ spring:
     port: 6379
 lbs:
   webApi: http://restapi.amap.com/v3/assistant/coordinate/convert
-  webKey: 615d7a323ea18d8df620ca9e89960c54
+  webKey: ****
 server:
   port: 8082
 
