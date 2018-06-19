@@ -34,7 +34,10 @@ public class AnjukePageProcesser implements PageProcessor {
     public static final String regexLatAndLng = "lat: (.*), lng: (.*)}\\);";
     Pattern pHouseId = Pattern.compile(regexHouseId);
     Pattern pLatAndLng = Pattern.compile(regexLatAndLng);
-    DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM); //省略了Locale对象，默认中文环境
+    /**
+     *  省略了Locale对象，默认中文环境
+     */
+    DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
 
     @Override
     public void process(Page page) {
