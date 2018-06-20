@@ -74,17 +74,17 @@ public class Music163Processer implements PageProcessor {
             }
         } else if (page.getUrl().regex(SINGER_LIST).match()) {
             List<String> surNameList = page.getHtml().xpath("//ul[@id='initial-selector']/li/a/@href").all();
-            page.addTargetRequests(surNameList.subList(1, surNameList.size() - 1));
-        } else if (page.getUrl().regex(ALBUM_LIST).match()||page.getUrl().regex(ALBUM_PAGE_LIST).match()) {
+            page.addTargetRequests(surNameList.subList(1, surNameList.size()));
+        } else if (page.getUrl().regex(ALBUM_LIST).match() || page.getUrl().regex(ALBUM_PAGE_LIST).match()) {
             List<String> albumList = page.getHtml().xpath("//ul[@id='m-song-module']/li//p/a/@href").all();
-            page.addTargetRequests(albumList);
             //分页数据
             List<String> albumListNext = page.getHtml().xpath("//div[@class='u-page']/a[@class='zpgi']/@href").all();
             if (albumListNext.size() > 1) {
-                page.addTargetRequests(albumListNext.subList(1, albumListNext.size() - 1));
+                page.addTargetRequests(albumListNext.subList(1, albumListNext.size()));
             } else {
                 page.addTargetRequests(albumListNext);
             }
+            page.addTargetRequests(albumList);
         } else if (page.getUrl().regex(ALBUM_DETAIL).match()) {
             List<String> singList = page.getHtml().xpath("//div[@id='song-list-pre-cache']//ul[@class='f-hide']/li/a/@href").all();
             page.addTargetRequests(singList);
@@ -101,7 +101,7 @@ public class Music163Processer implements PageProcessor {
     }
 
     public static void main(String[] args) {
-        Spider.create(new Music163Processer()).addUrl("https://music.163.com/discover/artist")
+        Spider.create(new Music163Processer()).addUrl("https://music.163.com/artist/album?id=2124")
                 .thread(1).addPipeline(new ConsolePipeline()).run();
     }
 }
