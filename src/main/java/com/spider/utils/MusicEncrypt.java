@@ -28,7 +28,12 @@ public class MusicEncrypt {
     private static String ivParameter = "0102030405060708";
     private static String context = "{rid: \"R_SO_4_25641368\",offset: \"0\",total: \"true\",limit: \"20\",csrf_token: \"\"}";
 
-
+    /**
+     * aes加密
+     * @param content 加密内容
+     * @param sKey 偏移量
+     * @return
+     */
     public static String AESEncrypt(String content,String sKey) {
         try {
             byte[] encryptedBytes;

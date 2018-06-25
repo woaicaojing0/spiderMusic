@@ -86,12 +86,14 @@ public class Music163Processer implements PageProcessor {
     @Override
     public void process(Page page) {
         if (page.getUrl().regex(URL_LIST).match()) {
-            List<String> groupId = page.getHtml().xpath("//div[@class ='blk']//li/a[@class='cat-flag']/@data-cat").all();
-            List<String> groupName = page.getHtml().xpath("//div[@class ='blk']//li/a[@class='cat-flag']/text()").all();
             List<String> groupHref = page.getHtml().xpath("//div[@class ='blk']//li/a[@class='cat-flag']/@href").all();
-            page.putField("id", groupId);
-            page.putField("groupName", groupName);
             page.addTargetRequests(groupHref);
+            return;
+        }
+        //sdsd
+        else if (page.getUrl().regex(SINGER_LIST).match()) {
+            List<String> surNameList = page.getHtml().xpath("//ul[@id='initial-selector']/li/a/@href").all();
+            page.addTargetRequests(surNameList.subList(1, surNameList.size()));
             return;
         } else if (page.getUrl().regex(SINGER_NAME_LIST).match()) {
             List<String> singerListHref = page.getHtml().xpath("//div[@class='m-sgerlist']/ul[@id='m-artist-box']/li[@class='sml']/a/@href").all();
@@ -104,10 +106,6 @@ public class Music163Processer implements PageProcessor {
                     page.addTargetRequest("https://music.163.com/artist/album?id=" + singerId);
                 }
             }
-            return;
-        } else if (page.getUrl().regex(SINGER_LIST).match()) {
-            List<String> surNameList = page.getHtml().xpath("//ul[@id='initial-selector']/li/a/@href").all();
-            page.addTargetRequests(surNameList.subList(1, surNameList.size()));
             return;
         } else if (page.getUrl().regex(ALBUM_LIST).match() || page.getUrl().regex(ALBUM_PAGE_LIST).match()) {
             List<String> albumList = page.getHtml().xpath("//ul[@id='m-song-module']/li//p/a/@href").all();
