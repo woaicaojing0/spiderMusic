@@ -1,12 +1,20 @@
 package com.spider.processer;
 
+import com.spider.bean.MusicComment;
+import com.spider.bean.MusicInfo;
+import com.spider.pipeline.Music163PipeLine;
+import com.spider.utils.MusicEncrypt;
+import org.apache.commons.lang3.StringUtils;
 import us.codecraft.webmagic.Page;
+import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
-import us.codecraft.webmagic.pipeline.ConsolePipeline;
+import us.codecraft.webmagic.model.HttpRequestBody;
 import us.codecraft.webmagic.processor.PageProcessor;
+import us.codecraft.webmagic.selector.JsonPathSelector;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,13 +51,30 @@ public class Music163Processer implements PageProcessor {
     /**
      * 歌曲地址  id 歌曲id
      */
-    private static final String SINGNADDRESS = "https://music\\.163\\.com/song\\?id=\\d+";
+    private static final String SONGNADDRESS = "https://music\\.163\\.com/song\\?id=(\\d+)";
+
+    private static final String COMMENT = "https://music\\.163\\.com/weapi/v1/resource/comments/*+";
     /**
      * 正则匹配歌手id
      */
     private static final String SINGER_ID_REGEX = "artist\\?id=(\\d*)";
+    /**
+     * 正则匹配歌手id
+     */
+    private static final String SONG_ID_REGEX = "song\\?id=(\\d*)";
+
+    /**
+     * 正则匹配歌曲id 通过匹配评论地址url
+     */
+    private static final String SONG_ID = "R_SO_4_(\\d+)";
+    /***
+     * 密钥
+     */
+    private static String sKey = "0CoJUm6Qyw8W8jud";
 
     Pattern compile = Pattern.compile(SINGER_ID_REGEX);
+    Pattern compileSong = Pattern.compile(SONG_ID_REGEX);
+    Pattern songId = Pattern.compile(SONG_ID);
 
     @Override
     public void process(Page page) {
@@ -88,10 +113,48 @@ public class Music163Processer implements PageProcessor {
         } else if (page.getUrl().regex(ALBUM_DETAIL).match()) {
             List<String> singList = page.getHtml().xpath("//div[@id='song-list-pre-cache']//ul[@class='f-hide']/li/a/@href").all();
             page.addTargetRequests(singList);
-        } else if (page.getUrl().regex(SINGNADDRESS).match()) {
-            String Name = page.getHtml().xpath("//div[@class='tit']/em[@class='f-ff2']/text()").toString();
-            String who = page.getHtml().xpath("//p[@class='des s-fc4']/span/a/text()").toString();
-            String zhuanji = page.getHtml().xpath("//p[@class='des s-fc4']/a/text()").toString();
+        } else if (page.getUrl().regex(SONGNADDRESS).match()) {
+            String songName = page.getHtml().xpath("//div[@class='tit']/em[@class='f-ff2']/text()").toString();
+            String singerName = page.getHtml().xpath("//p[@class='des s-fc4']/span/a/text()").toString();
+            String ablumName = page.getHtml().xpath("//p[@class='des s-fc4']/a/text()").toString();
+            Matcher matcher = compileSong.matcher(page.getUrl().toString());
+            if (matcher.find()) {
+                String songId = matcher.group(1);
+                MusicInfo musicInfo = new MusicInfo();
+                musicInfo.setSongId(songId);
+                musicInfo.setAlbum(ablumName);
+                musicInfo.setTitle(songName);
+                musicInfo.setAuthor(singerName);
+                musicInfo.setURL(page.getUrl().toString());
+                page.putField("musicInfo", musicInfo);
+
+                Request request = new Request("https://music.163.com/weapi/v1/resource/comments/R_SO_4_" + songId + "?csrf_token=");
+                request.setMethod("post");
+                request.setRequestBody(HttpRequestBody.form(makePostParam(songId, "true", 1), "UTF-8"));
+                page.addTargetRequest(request);
+            }
+
+        } else if (page.getUrl().regex(COMMENT).match()) {
+            Matcher matcher = songId.matcher(page.getUrl().toString());
+            if (matcher.find()) {
+                String songId = matcher.group(1);
+                List<String> contentList = new JsonPathSelector("$.hotComments.[*].content").selectList(page.getRawText());
+                List<String> likeCountList = new JsonPathSelector("$.hotComments.[*].likedCount").selectList(page.getRawText());
+                List<String> nicknameList = new JsonPathSelector("$.hotComments.[*].user.nickname").selectList(page.getRawText());
+                List<String> timeList = new JsonPathSelector("$.hotComments.[*].time").selectList(page.getRawText());
+                String stringTotal = new JsonPathSelector("$.total").select(page.getRawText());
+                List<MusicComment> commentsList = new ArrayList<>();
+                for (int i = 0; i < contentList.size(); i++) {
+                    MusicComment comment = new MusicComment();
+                    comment.setContent(filterEmoji(contentList.get(i)));
+                    comment.setSongId(songId);
+                    comment.setLikedCount(Integer.valueOf(likeCountList.get(i)));
+                    comment.setNickName(nicknameList.get(i));
+                    comment.setTime(stampToDate(Long.valueOf(timeList.get(i))));
+                    commentsList.add(comment);
+                }
+                page.putField("commentsList", commentsList);
+            }
         }
     }
 
@@ -101,7 +164,71 @@ public class Music163Processer implements PageProcessor {
     }
 
     public static void main(String[] args) {
-        Spider.create(new Music163Processer()).addUrl("https://music.163.com/artist/album?id=2124")
-                .thread(1).addPipeline(new ConsolePipeline()).run();
+        Spider.create(new Music163Processer()).addUrl("https://music.163.com/song?id=448722028").addUrl("https://music.163.com/song?id=418603077")
+                .addUrl("https://music.163.com/song?id=186016").addUrl("https://music.163.com/song?id=185709")
+                .addUrl("https://music.163.com/song?id=185694").addUrl("https://music.163.com/song?id=186014")
+                .thread(2).addPipeline(new Music163PipeLine()).run();
+    }
+
+    /**
+     * @param songId     歌曲ID
+     * @param paging     是否第一页 true 第一页  其余传入false
+     * @param nowPageNum 当前页数
+     * @return
+     */
+    public static String makeContent(String songId, String paging, int nowPageNum) {
+        int offset;
+        if (nowPageNum < 1) {
+            offset = 20;
+        }
+        offset = (nowPageNum - 1) * 20;
+        String baseContent = "{rid: \"R_SO_4_%s\",offset: \"%d\",total: \"%s\",limit: \"20\",csrf_token: \"\"}";
+        return String.format(baseContent, songId, offset, paging);
+    }
+
+    /**
+     * 获取评论的2个参数设置
+     *
+     * @param content
+     * @return
+     */
+    public Map<String, Object> makePostParam(String content) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("params", MusicEncrypt.AESEncrypt((MusicEncrypt.AESEncrypt(content, sKey)), "FFFFFFFFFFFFFFFF"));
+        map.put("encSecKey", MusicEncrypt.rsaEncrypt());
+        return map;
+    }
+
+    public Map<String, Object> makePostParam(String songId, String paging, int nowPageNum) {
+        return makePostParam(makeContent(songId, paging, nowPageNum));
+    }
+
+    /**
+     * 将emoji表情替换成*
+     *
+     * @param source
+     * @return 过滤后的字符串
+     */
+    public static String filterEmoji(String source) {
+        if (StringUtils.isNotBlank(source)) {
+            return source.replaceAll("[\\ud800\\udc00-\\udbff\\udfff\\ud800-\\udfff]", "*");
+        } else {
+            return source;
+        }
+    }
+
+    /**
+     * 将时间戳转换为时间
+     *
+     * @param s
+     * @return
+     */
+    public static String stampToDate(long s) {
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long lt = s;
+        Date date = new Date(lt);
+        res = simpleDateFormat.format(date);
+        return res;
     }
 }

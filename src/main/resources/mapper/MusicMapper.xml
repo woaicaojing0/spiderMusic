@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.spider.dao.MusicDao">
+
+    <insert id="addMusicInfo">
+        insert into music_info (songId, title, author, album, URL) values
+            (#{musicInfo.songId}, #{musicInfo.title}, #{musicInfo.author}, #{musicInfo.album}, #{musicInfo.URL})
+    </insert>
+    <insert id="addMusicComment">
+        insert into musci_comment(songId, nickname, likedCount, content, time)
+        values
+        <foreach collection="commentList" item="comment" separator=",">
+            (#{comment.songId},#{comment.nickName},#{comment.likedCount},#{comment.content},#{comment.time})
+        </foreach>
+    </insert>
+</mapper>
