@@ -1,12 +1,13 @@
 package com.spider.service;
 
+import com.spider.bean.AlbumInfo;
 import com.spider.bean.MusicComment;
 import com.spider.bean.MusicInfo;
+import com.spider.bean.SingerInfo;
 import com.spider.dao.MusicDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.stream.events.Comment;
 import java.util.List;
 
 /**
@@ -27,5 +28,15 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public int addMusicComment(List<MusicComment> commentList) {
         return musicDao.addMusicComment(commentList);
+    }
+
+    @Override
+    public int addAlbumInfo(AlbumInfo albumInfo) {
+        return musicDao.addAlbumInfo(albumInfo);
+    }
+
+    @Override
+    public int addSingerInfo(SingerInfo singerInfo) {
+        return musicDao.addSingerInfo(singerInfo);
     }
 }

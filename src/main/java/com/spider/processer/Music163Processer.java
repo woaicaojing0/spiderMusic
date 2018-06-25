@@ -1,7 +1,9 @@
 package com.spider.processer;
 
+import com.spider.bean.AlbumInfo;
 import com.spider.bean.MusicComment;
 import com.spider.bean.MusicInfo;
+import com.spider.bean.SingerInfo;
 import com.spider.pipeline.Music163PipeLine;
 import com.spider.utils.MusicEncrypt;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +15,7 @@ import us.codecraft.webmagic.model.HttpRequestBody;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.JsonPathSelector;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -39,7 +42,7 @@ public class Music163Processer implements PageProcessor {
     /**
      * 某一歌手所有专辑
      */
-    private static final String ALBUM_LIST = "https://music\\.163\\.com/artist/album\\?id=\\d+";
+    private static final String ALBUM_LIST = "https://music\\.163\\.com/artist/album\\?id=(\\d+)$";
     /**
      * 某一歌手所有专辑(分页)
      */
@@ -52,7 +55,9 @@ public class Music163Processer implements PageProcessor {
      * 歌曲地址  id 歌曲id
      */
     private static final String SONGNADDRESS = "https://music\\.163\\.com/song\\?id=(\\d+)";
-
+    /**
+     * 获取评论地址
+     */
     private static final String COMMENT = "https://music\\.163\\.com/weapi/v1/resource/comments/*+";
     /**
      * 正则匹配歌手id
@@ -75,6 +80,8 @@ public class Music163Processer implements PageProcessor {
     Pattern compile = Pattern.compile(SINGER_ID_REGEX);
     Pattern compileSong = Pattern.compile(SONG_ID_REGEX);
     Pattern songId = Pattern.compile(SONG_ID);
+    Pattern albumSingerId = Pattern.compile(ALBUM_LIST);
+    DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
 
     @Override
     public void process(Page page) {
@@ -82,14 +89,14 @@ public class Music163Processer implements PageProcessor {
             List<String> groupId = page.getHtml().xpath("//div[@class ='blk']//li/a[@class='cat-flag']/@data-cat").all();
             List<String> groupName = page.getHtml().xpath("//div[@class ='blk']//li/a[@class='cat-flag']/text()").all();
             List<String> groupHref = page.getHtml().xpath("//div[@class ='blk']//li/a[@class='cat-flag']/@href").all();
-            System.out.println(groupId.toString());
-            System.out.println(groupName.toString());
-            System.out.println(groupHref.toString());
             page.putField("id", groupId);
             page.putField("groupName", groupName);
             page.addTargetRequests(groupHref);
+            return;
         } else if (page.getUrl().regex(SINGER_NAME_LIST).match()) {
             List<String> singerListHref = page.getHtml().xpath("//div[@class='m-sgerlist']/ul[@id='m-artist-box']/li[@class='sml']/a/@href").all();
+            List<String> singerListIamgeHref = page.getHtml().xpath("//div[@class='m-sgerlist']/ul[@id='m-artist-box']/li/p/a/@href").all();
+            singerListHref.addAll(singerListIamgeHref);
             for (String singerHref : singerListHref) {
                 Matcher matcher = compile.matcher(singerHref);
                 if (matcher.find()) {
@@ -97,11 +104,36 @@ public class Music163Processer implements PageProcessor {
                     page.addTargetRequest("https://music.163.com/artist/album?id=" + singerId);
                 }
             }
+            return;
         } else if (page.getUrl().regex(SINGER_LIST).match()) {
             List<String> surNameList = page.getHtml().xpath("//ul[@id='initial-selector']/li/a/@href").all();
             page.addTargetRequests(surNameList.subList(1, surNameList.size()));
+            return;
         } else if (page.getUrl().regex(ALBUM_LIST).match() || page.getUrl().regex(ALBUM_PAGE_LIST).match()) {
             List<String> albumList = page.getHtml().xpath("//ul[@id='m-song-module']/li//p/a/@href").all();
+            if (albumList.size() < 0) {
+                return;
+            }
+            //只有是第一次才需要记录歌手信息
+            if (page.getUrl().regex(ALBUM_LIST).match()) {
+                //通过这种方式获取id可以防止专辑为空的情况
+                String singerId = "0";
+                Matcher matcher = albumSingerId.matcher(page.getUrl().toString());
+                while (matcher.find()) {
+                    singerId = matcher.group(1);
+                }
+                //获取歌手信息
+                String singerName = page.getHtml().xpath("//h2[@id='artist-name']/text()").toString();
+                String description = page.getHtml().xpath("//meta[@name='description']/@content").toString();
+                SingerInfo singerInfo = new SingerInfo();
+                singerInfo.setSingerDescription(description == null ? "" : description);
+                singerInfo.setSingerId(Integer.valueOf(singerId));
+                singerInfo.setSingerName(singerName == null ? "" : singerName);
+                singerInfo.setCreateTime(df.format(new Date()));
+                singerInfo.setSingerHref("https://music.163.com/artist?id=" + singerId);
+                page.putField("singerInfo", singerInfo);
+            }
+
             //分页数据
             List<String> albumListNext = page.getHtml().xpath("//div[@class='u-page']/a[@class='zpgi']/@href").all();
             if (albumListNext.size() > 1) {
@@ -110,9 +142,33 @@ public class Music163Processer implements PageProcessor {
                 page.addTargetRequests(albumListNext);
             }
             page.addTargetRequests(albumList);
+            return;
         } else if (page.getUrl().regex(ALBUM_DETAIL).match()) {
             List<String> singList = page.getHtml().xpath("//div[@id='song-list-pre-cache']//ul[@class='f-hide']/li/a/@href").all();
-            page.addTargetRequests(singList);
+            String albumId = page.getHtml().xpath("//div[@id='content-operation']/@data-rid").toString();
+            String albumName = page.getHtml().xpath("//div[@class='tit']/[@class='f-ff2']/text()").toString();
+            String albumTime = page.getHtml().xpath("////div[@class='topblk']/p[2]/text()").toString();
+            String albumCompany = page.getHtml().xpath("//div[@class='topblk']/p[3]/text()").toString();
+            String albumSingerName = page.getHtml().xpath("//p[@class='intr']//a[@class='s-fc7']/text()").toString();
+            String albumSingerId = "";
+            String albumSingerHref = page.getHtml().xpath("//p[@class='intr']//a[@class='s-fc7']/@href").toString();
+            if (albumSingerHref != null) {
+                Matcher matcher = compile.matcher(albumSingerHref);
+                if (matcher.find()) {
+                    albumSingerId = matcher.group(1);
+                }
+            }
+            AlbumInfo albumInfo = new AlbumInfo();
+            albumInfo.setAlbumId(Integer.valueOf(albumId));
+            albumInfo.setAlbumName(albumName);
+            albumInfo.setAlbumTime(albumTime);
+            albumInfo.setAlbumCompany(albumCompany);
+            albumInfo.setAlbumSingerName(albumSingerName);
+            albumInfo.setAlbumSingerId(albumSingerId);
+            page.putField("albumInfo", albumInfo);
+            return;
+            //获取专辑详情
+//            page.addTargetRequests(singList);
         } else if (page.getUrl().regex(SONGNADDRESS).match()) {
             String songName = page.getHtml().xpath("//div[@class='tit']/em[@class='f-ff2']/text()").toString();
             String singerName = page.getHtml().xpath("//p[@class='des s-fc4']/span/a/text()").toString();
@@ -133,7 +189,7 @@ public class Music163Processer implements PageProcessor {
                 request.setRequestBody(HttpRequestBody.form(makePostParam(songId, "true", 1), "UTF-8"));
                 page.addTargetRequest(request);
             }
-
+            return;
         } else if (page.getUrl().regex(COMMENT).match()) {
             Matcher matcher = songId.matcher(page.getUrl().toString());
             if (matcher.find()) {
@@ -155,6 +211,7 @@ public class Music163Processer implements PageProcessor {
                 }
                 page.putField("commentsList", commentsList);
             }
+            return;
         }
     }
 

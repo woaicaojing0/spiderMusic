@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.spider.dao.MusicDao">
 
+    <resultMap id="albumInfoMap" type="com.spider.bean.AlbumInfo">
+        <result column="album_id" property="albumId"></result>
+        <result column="album_name" property="albumName"></result>
+        <result column="album_time" property="albumTime"></result>
+        <result column="album_company" property="albumCompany"></result>
+        <result column="album_singer_name" property="albumSingerName"></result>
+        <result column="album_singer_id" property="albumSingerId"></result>
+    </resultMap>
+    <resultMap id="singerInfo" type="com.spider.bean.SingerInfo">
+        <result column="singer_id" property="singerId"></result>
+        <result column="singer_name" property="singerName"></result>
+        <result column="singer_description" property="singerDescription"></result>
+        <result column="singer_href" property="singerHref"></result>
+        <result column="create_time" property="createTime"></result>
+    </resultMap>
+
     <insert id="addMusicInfo">
         insert into music_info (songId, title, author, album, URL) values
             (#{musicInfo.songId}, #{musicInfo.title}, #{musicInfo.author}, #{musicInfo.album}, #{musicInfo.URL})
@@ -12,5 +28,15 @@
         <foreach collection="commentList" item="comment" separator=",">
             (#{comment.songId},#{comment.nickName},#{comment.likedCount},#{comment.content},#{comment.time})
         </foreach>
+    </insert>
+    <insert id="addAlbumInfo">
+        insert into album_info (album_id, album_name, album_time, album_company, album_singer_name, album_singer_id)
+        values (#{albumInfo.albumId}, #{albumInfo.albumName}, #{albumInfo.albumTime},
+                #{albumInfo.albumCompany}, #{albumInfo.albumSingerName}, #{albumInfo.albumSingerId})
+    </insert>
+    <insert id="addSingerInfo">
+        insert into singer_info (singer_id, singer_name, singer_description, singer_href, create_time) values
+            (#{singerInfo.singerId}, #{singerInfo.singerName}, #{singerInfo.singerDescription},
+             #{singerInfo.singerHref}, #{singerInfo.createTime})
     </insert>
 </mapper>

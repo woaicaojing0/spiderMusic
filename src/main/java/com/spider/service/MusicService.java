@@ -1,7 +1,9 @@
 package com.spider.service;
 
+import com.spider.bean.AlbumInfo;
 import com.spider.bean.MusicComment;
 import com.spider.bean.MusicInfo;
+import com.spider.bean.SingerInfo;
 
 import java.util.List;
 
@@ -26,5 +28,22 @@ public interface MusicService {
      * @return
      */
     int addMusicComment( List<MusicComment> commentList);
+
+
+    /**
+     * 新增专辑信息
+     *
+     * @param albumInfo
+     * @return
+     */
+    int addAlbumInfo( AlbumInfo albumInfo);
+
+    /**
+     * 新增歌手信息
+     *
+     * @param singerInfo
+     * @return
+     */
+    int addSingerInfo( SingerInfo singerInfo);
 
 }
